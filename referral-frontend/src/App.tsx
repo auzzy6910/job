@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -14,43 +14,23 @@ import Gifts from "./pages/Gifts";
 import DiamondDraw from "./pages/DiamondDraw";
 import Wallet from "./pages/Wallet";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { token, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
-        <div className="text-purple-400 text-lg">Loading...</div>
-      </div>
-    );
-  }
-  if (!token) return <Navigate to="/login" />;
-  return <Layout>{children}</Layout>;
-}
-
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { token, loading } = useAuth();
-  if (loading) return null;
-  if (token) return <Navigate to="/dashboard" />;
-  return <>{children}</>;
-}
-
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/referrals" element={<ProtectedRoute><Referrals /></ProtectedRoute>} />
-          <Route path="/spin" element={<ProtectedRoute><SpinWheel /></ProtectedRoute>} />
-          <Route path="/stars" element={<ProtectedRoute><StarsPage /></ProtectedRoute>} />
-          <Route path="/microtasks" element={<ProtectedRoute><Microtasks /></ProtectedRoute>} />
-          <Route path="/booster" element={<ProtectedRoute><Booster /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-          <Route path="/gifts" element={<ProtectedRoute><Gifts /></ProtectedRoute>} />
-          <Route path="/diamond" element={<ProtectedRoute><DiamondDraw /></ProtectedRoute>} />
-          <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/referrals" element={<Layout><Referrals /></Layout>} />
+          <Route path="/spin" element={<Layout><SpinWheel /></Layout>} />
+          <Route path="/stars" element={<Layout><StarsPage /></Layout>} />
+          <Route path="/microtasks" element={<Layout><Microtasks /></Layout>} />
+          <Route path="/booster" element={<Layout><Booster /></Layout>} />
+          <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
+          <Route path="/gifts" element={<Layout><Gifts /></Layout>} />
+          <Route path="/diamond" element={<Layout><DiamondDraw /></Layout>} />
+          <Route path="/wallet" element={<Layout><Wallet /></Layout>} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
