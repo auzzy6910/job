@@ -5,7 +5,15 @@ import { Wallet as WalletIcon, ArrowDown, ArrowUp, Clock } from "lucide-react";
 
 export default function Wallet() {
   const { user, refreshUser } = useAuth();
-  const [transactions, setTransactions] = useState<any[]>([]);
+  interface Transaction {
+    id: number;
+    user_id: number;
+    amount: number;
+    type: string;
+    description: string;
+    created_at: string;
+  }
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [depositAmt, setDepositAmt] = useState("");
   const [withdrawAmt, setWithdrawAmt] = useState("");
@@ -25,8 +33,8 @@ export default function Wallet() {
       await refreshUser();
       const txns = await api.getTransactions();
       setTransactions(txns);
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Deposit failed");
     }
   };
 
@@ -40,8 +48,8 @@ export default function Wallet() {
       await refreshUser();
       const txns = await api.getTransactions();
       setTransactions(txns);
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Withdrawal failed");
     }
   };
 

@@ -5,7 +5,19 @@ import { RotateCw, Trophy, Clock } from "lucide-react";
 
 export default function SpinWheel() {
   const { refreshUser } = useAuth();
-  const [status, setStatus] = useState<any>(null);
+  interface SpinRecord {
+    id: number;
+    user_id: number;
+    amount: number;
+    spun_at: string;
+  }
+  interface SpinStatus {
+    can_spin: boolean;
+    last_spin: SpinRecord | null;
+    history: SpinRecord[];
+    amounts: number[];
+  }
+  const [status, setStatus] = useState<SpinStatus | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<number | null>(null);
   const [angle, setAngle] = useState(0);
@@ -39,8 +51,8 @@ export default function SpinWheel() {
         const newStatus = await api.spinStatus();
         setStatus(newStatus);
       }, 4000);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Spin failed");
       setSpinning(false);
     }
   };
@@ -144,11 +156,11 @@ export default function SpinWheel() {
       </div>
 
       {/* History */}
-      {status?.history?.length > 0 && (
+      {status && status.history.length > 0 && (
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-purple-500/20">
           <h2 className="text-white font-semibold mb-4">Spin History</h2>
           <div className="space-y-2">
-            {status.history.map((h: any) => (
+            {status.history.map((h) => (
               <div key={h.id} className="flex justify-between items-center bg-black/20 rounded-xl p-3">
                 <span className="text-gray-400 text-sm">{new Date(h.spun_at).toLocaleDateString()}</span>
                 <span className={`font-semibold ${h.amount > 0 ? "text-green-400" : "text-gray-500"}`}>

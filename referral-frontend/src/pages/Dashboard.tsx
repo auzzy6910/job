@@ -18,8 +18,8 @@ export default function Dashboard() {
       const res = await api.activate();
       setMsg(res.message);
       await refreshUser();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Activation failed");
     } finally {
       setActivating(false);
     }

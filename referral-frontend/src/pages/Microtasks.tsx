@@ -5,7 +5,15 @@ import { ListChecks, CheckCircle, Circle, Lock, DollarSign } from "lucide-react"
 
 export default function Microtasks() {
   const { user, refreshUser } = useAuth();
-  const [tasks, setTasks] = useState<any[]>([]);
+  interface Microtask {
+    id: number;
+    title: string;
+    description: string;
+    reward: number;
+    is_active: number;
+    completed: boolean;
+  }
+  const [tasks, setTasks] = useState<Microtask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
@@ -14,8 +22,8 @@ export default function Microtasks() {
     try {
       const data = await api.getMicrotasks();
       setTasks(data.tasks);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -32,8 +40,8 @@ export default function Microtasks() {
       setMsg(res.message);
       await refreshUser();
       await loadTasks();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to complete task");
     }
   };
 

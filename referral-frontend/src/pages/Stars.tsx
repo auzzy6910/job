@@ -5,7 +5,21 @@ import { Star, Gift, Clock, Send } from "lucide-react";
 
 export default function StarsPage() {
   const { refreshUser } = useAuth();
-  const [status, setStatus] = useState<any>(null);
+  interface StarRecord {
+    id: number;
+    user_id: number;
+    value: number;
+    collected_at: string;
+    expires_at: string;
+    claimed: number;
+  }
+  interface StarStatus {
+    collected_today: boolean;
+    today_star: StarRecord | null;
+    unclaimed_stars: StarRecord[];
+    history: StarRecord[];
+  }
+  const [status, setStatus] = useState<StarStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [giftUser, setGiftUser] = useState("");
@@ -31,8 +45,8 @@ export default function StarsPage() {
       const res = await api.collectStar();
       setMsg(res.message);
       await loadStatus();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to collect star");
     }
   };
 
@@ -43,8 +57,8 @@ export default function StarsPage() {
       setMsg(res.message);
       await refreshUser();
       await loadStatus();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to claim stars");
     }
   };
 
@@ -57,8 +71,8 @@ export default function StarsPage() {
       setMsg(res.message);
       setGiftUser("");
       await refreshUser();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to send gift");
     } finally {
       setGifting(false);
     }
@@ -114,11 +128,11 @@ export default function StarsPage() {
       </div>
 
       {/* Claim Stars */}
-      {status?.unclaimed_stars?.length > 0 && (
+      {status && status.unclaimed_stars.length > 0 && (
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-green-500/20">
           <h2 className="text-white font-semibold mb-3">Unclaimed Stars</h2>
           <div className="flex flex-wrap gap-3 mb-4">
-            {status.unclaimed_stars.map((s: any) => (
+            {status.unclaimed_stars.map((s) => (
               <div key={s.id} className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-3 py-2 flex items-center gap-2">
                 <Star size={16} className="text-yellow-400" fill="currentColor" />
                 <span className="text-yellow-300 font-semibold">{s.value} KES</span>
@@ -170,11 +184,11 @@ export default function StarsPage() {
       </div>
 
       {/* Star History */}
-      {status?.history?.length > 0 && (
+      {status && status.history.length > 0 && (
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-purple-500/20">
           <h2 className="text-white font-semibold mb-4">Star History</h2>
           <div className="space-y-2">
-            {status.history.map((h: any) => (
+            {status.history.map((h) => (
               <div key={h.id} className="flex justify-between items-center bg-black/20 rounded-xl p-3">
                 <div className="flex items-center gap-2">
                   <Star size={14} className="text-yellow-400" fill={h.claimed ? "currentColor" : "none"} />

@@ -21,8 +21,8 @@ export default function Signup() {
     try {
       await signup(username, email, password, referralCode || undefined);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
       setLoading(false);
     }
