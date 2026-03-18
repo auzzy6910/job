@@ -3,7 +3,18 @@ import { api } from "../lib/api";
 import { Crown, Trophy, Medal } from "lucide-react";
 
 export default function Leaderboard() {
-  const [data, setData] = useState<any>(null);
+  interface LeaderboardEntry {
+    position: number;
+    username: string;
+    referral_count: number;
+    total_earned: number;
+    crown_prize: number;
+  }
+  interface LeaderboardData {
+    leaderboard: LeaderboardEntry[];
+    prizes: Record<string, number>;
+  }
+  const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +65,7 @@ export default function Leaderboard() {
             <p className="text-gray-400">No referrals yet. Be the first to climb the leaderboard!</p>
           </div>
         ) : (
-          data?.leaderboard?.map((entry: any, i: number) => (
+          data?.leaderboard?.map((entry, i) => (
             <div
               key={i}
               className={`backdrop-blur-md rounded-2xl p-5 border ${positionColors[i] || positionColors[4]}`}

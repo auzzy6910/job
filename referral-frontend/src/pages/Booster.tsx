@@ -5,7 +5,21 @@ import { Rocket, Clock, ArrowDown, ArrowUp } from "lucide-react";
 
 export default function Booster() {
   const { refreshUser } = useAuth();
-  const [status, setStatus] = useState<any>(null);
+  interface BoosterRecord {
+    id: number;
+    user_id: number;
+    amount: number;
+    deposited_at: string;
+    withdrawable_at: string;
+    withdrawn: number;
+    can_withdraw?: boolean;
+  }
+  interface BoosterStatus {
+    has_active_booster: boolean;
+    active_booster: BoosterRecord | null;
+    history: BoosterRecord[];
+  }
+  const [status, setStatus] = useState<BoosterStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
 
@@ -29,8 +43,8 @@ export default function Booster() {
       setMsg(res.message);
       await refreshUser();
       await loadStatus();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Deposit failed");
     }
   };
 
@@ -41,8 +55,8 @@ export default function Booster() {
       setMsg(res.message);
       await refreshUser();
       await loadStatus();
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Withdrawal failed");
     }
   };
 
@@ -85,34 +99,38 @@ export default function Booster() {
             <h2 className="text-white font-semibold">Active Booster</h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-black/20 rounded-xl p-4">
-              <p className="text-gray-400 text-sm">Amount</p>
-              <p className="text-xl font-bold text-white">{status.active_booster.amount} KES</p>
-            </div>
-            <div className="bg-black/20 rounded-xl p-4">
-              <p className="text-gray-400 text-sm">Status</p>
-              <p className={`text-xl font-bold ${status.active_booster.can_withdraw ? "text-green-400" : "text-yellow-400"}`}>
-                {status.active_booster.can_withdraw ? "Ready" : "Maturing"}
-              </p>
-            </div>
-          </div>
+          {status?.active_booster && (
+            <>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-black/20 rounded-xl p-4">
+                  <p className="text-gray-400 text-sm">Amount</p>
+                  <p className="text-xl font-bold text-white">{status.active_booster.amount} KES</p>
+                </div>
+                <div className="bg-black/20 rounded-xl p-4">
+                  <p className="text-gray-400 text-sm">Status</p>
+                  <p className={`text-xl font-bold ${status.active_booster.can_withdraw ? "text-green-400" : "text-yellow-400"}`}>
+                    {status.active_booster.can_withdraw ? "Ready" : "Maturing"}
+                  </p>
+                </div>
+              </div>
 
-          <div className="bg-black/20 rounded-xl p-4 mb-4">
-            <p className="text-gray-400 text-sm">Deposited</p>
-            <p className="text-gray-300 text-sm">{new Date(status.active_booster.deposited_at).toLocaleString()}</p>
-            <p className="text-gray-400 text-sm mt-2">Withdrawable After</p>
-            <p className="text-gray-300 text-sm">{new Date(status.active_booster.withdrawable_at).toLocaleString()}</p>
-          </div>
+              <div className="bg-black/20 rounded-xl p-4 mb-4">
+                <p className="text-gray-400 text-sm">Deposited</p>
+                <p className="text-gray-300 text-sm">{new Date(status.active_booster.deposited_at).toLocaleString()}</p>
+                <p className="text-gray-400 text-sm mt-2">Withdrawable After</p>
+                <p className="text-gray-300 text-sm">{new Date(status.active_booster.withdrawable_at).toLocaleString()}</p>
+              </div>
 
-          <button
-            onClick={handleWithdraw}
-            disabled={!status.active_booster.can_withdraw}
-            className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <ArrowUp size={18} />
-            {status.active_booster.can_withdraw ? "Withdraw 200 KES" : "Not Yet Withdrawable"}
-          </button>
+              <button
+                onClick={handleWithdraw}
+                disabled={!status.active_booster.can_withdraw}
+                className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <ArrowUp size={18} />
+                {status.active_booster.can_withdraw ? "Withdraw 200 KES" : "Not Yet Withdrawable"}
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-purple-500/20 text-center">
@@ -132,11 +150,11 @@ export default function Booster() {
       )}
 
       {/* History */}
-      {status?.history?.length > 0 && (
+      {status && status.history.length > 0 && (
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-purple-500/20">
           <h2 className="text-white font-semibold mb-4">Booster History</h2>
           <div className="space-y-2">
-            {status.history.map((h: any) => (
+            {status.history.map((h) => (
               <div key={h.id} className="flex justify-between items-center bg-black/20 rounded-xl p-3">
                 <span className="text-gray-400 text-sm">{new Date(h.deposited_at).toLocaleDateString()}</span>
                 <div className="flex items-center gap-2">

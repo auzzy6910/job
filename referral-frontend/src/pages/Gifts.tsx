@@ -5,8 +5,25 @@ import { Gift, ArrowUp, ArrowDown, Star, Coins } from "lucide-react";
 
 export default function Gifts() {
   const { refreshUser } = useAuth();
-  const [giftData, setGiftData] = useState<any>(null);
-  const [credits, setCredits] = useState<any>(null);
+  interface GiftRecord {
+    id: number;
+    star_value: number;
+    created_at: string;
+    sender_name?: string;
+    receiver_name?: string;
+  }
+  interface GiftData {
+    sent: GiftRecord[];
+    received: GiftRecord[];
+    total_sent: number;
+    total_received: number;
+  }
+  interface CreditData {
+    claimed_today: boolean;
+    credit: { amount: number } | null;
+  }
+  const [giftData, setGiftData] = useState<GiftData | null>(null);
+  const [credits, setCredits] = useState<CreditData | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
 
@@ -28,8 +45,8 @@ export default function Gifts() {
       await refreshUser();
       const c = await api.getDailyCredits();
       setCredits(c);
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to claim credits");
     }
   };
 
@@ -95,7 +112,7 @@ export default function Gifts() {
           <p className="text-gray-500 text-center py-4">No gifts received yet</p>
         ) : (
           <div className="space-y-2">
-            {giftData?.received?.map((g: any) => (
+            {giftData?.received?.map((g) => (
               <div key={g.id} className="flex justify-between items-center bg-black/20 rounded-xl p-3">
                 <div className="flex items-center gap-2">
                   <Star size={16} className="text-yellow-400" />
@@ -118,7 +135,7 @@ export default function Gifts() {
           <p className="text-gray-500 text-center py-4">No gifts sent yet</p>
         ) : (
           <div className="space-y-2">
-            {giftData?.sent?.map((g: any) => (
+            {giftData?.sent?.map((g) => (
               <div key={g.id} className="flex justify-between items-center bg-black/20 rounded-xl p-3">
                 <div className="flex items-center gap-2">
                   <Star size={16} className="text-pink-400" />

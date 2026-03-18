@@ -3,7 +3,27 @@ import { api } from "../lib/api";
 import { Users, Copy, Check, UserCheck, Clock, DollarSign } from "lucide-react";
 
 export default function Referrals() {
-  const [data, setData] = useState<any>(null);
+  interface ReferralData {
+    referral_code: string;
+    locked_bonus: number;
+    first_referral_completed: boolean;
+    stats: {
+      total: number;
+      deposits_made: number;
+      bonuses_paid: number;
+      total_earned: number;
+    };
+    referrals: {
+      id: number;
+      referred_username: string;
+      is_activated: number;
+      deposit_made: number;
+      bonus_paid: number;
+      amount_paid: number;
+      created_at: string;
+    }[];
+  }
+  const [data, setData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -51,7 +71,7 @@ export default function Referrals() {
       {(data?.locked_bonus ?? 0) > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-5">
           <p className="text-yellow-300">
-            You have <strong>KES {data.locked_bonus}</strong> locked bonus.
+            You have <strong>KES {data?.locked_bonus}</strong> locked bonus.
             Invite someone who deposits 200 KES to unlock it!
           </p>
         </div>
@@ -87,7 +107,7 @@ export default function Referrals() {
           <p className="text-gray-500 text-center py-8">No referrals yet. Share your link to start earning!</p>
         ) : (
           <div className="space-y-3">
-            {data?.referrals?.map((r: any) => (
+            {data?.referrals?.map((r) => (
               <div key={r.id} className="flex items-center justify-between bg-black/20 rounded-xl p-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${

@@ -1,4 +1,22 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const RAW_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+// Extract credentials from URL if present (browsers block fetch with inline credentials)
+function parseApiUrl(raw: string): { url: string; basicAuth: string | null } {
+  try {
+    const parsed = new URL(raw);
+    if (parsed.username) {
+      const creds = btoa(`${decodeURIComponent(parsed.username)}:${decodeURIComponent(parsed.password)}`);
+      parsed.username = "";
+      parsed.password = "";
+      return { url: parsed.origin + parsed.pathname.replace(/\/$/, ""), basicAuth: `Basic ${creds}` };
+    }
+  } catch {
+    // not a valid URL, use as-is
+  }
+  return { url: raw, basicAuth: null };
+}
+
+const { url: API_URL, basicAuth: TUNNEL_AUTH } = parseApiUrl(RAW_API_URL);
 
 function getToken(): string | null {
   return localStorage.getItem("token");
@@ -12,6 +30,9 @@ async function request(path: string, options: RequestInit = {}) {
   };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+  if (TUNNEL_AUTH) {
+    headers["Proxy-Authorization"] = TUNNEL_AUTH;
   }
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });

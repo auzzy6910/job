@@ -3,7 +3,21 @@ import { api } from "../lib/api";
 import { Diamond, Trophy, Calendar, Users } from "lucide-react";
 
 export default function DiamondDraw() {
-  const [data, setData] = useState<any>(null);
+  interface DiamondDrawData {
+    current_month: string;
+    is_entered: boolean;
+    total_entries: number;
+    prize: number;
+    past_winners: {
+      id: number;
+      user_id: number;
+      username: string;
+      month: string;
+      amount: number;
+      won_at: string;
+    }[];
+  }
+  const [data, setData] = useState<DiamondDrawData | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
 
@@ -18,8 +32,8 @@ export default function DiamondDraw() {
       setMsg(res.message);
       const newData = await api.getDiamondDraw();
       setData(newData);
-    } catch (err: any) {
-      setMsg(err.message);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to enter draw");
     }
   };
 
@@ -84,7 +98,7 @@ export default function DiamondDraw() {
           <p className="text-gray-500 text-center py-4">No past winners yet. Be the first!</p>
         ) : (
           <div className="space-y-3">
-            {data?.past_winners?.map((w: any) => (
+            {data?.past_winners?.map((w) => (
               <div key={w.id} className="flex justify-between items-center bg-black/20 rounded-xl p-4">
                 <div className="flex items-center gap-3">
                   <Diamond size={18} className="text-cyan-400" />
